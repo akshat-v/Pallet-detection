@@ -1,0 +1,2 @@
+
+-DCATKIN_DEVEL_PREFIX=/home/akshat/Pallet_detection/devel -DCMAKE_INSTALL_PREFIX=/home/akshat/Pallet_detection/install -G Unix Makefiles
