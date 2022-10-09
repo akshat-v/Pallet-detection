@@ -18,26 +18,24 @@ class pallet_detector:
   def __init__(self):
     self.bridge = CvBridge()
     
-    self.image_sub = rospy.Subscriber("/stereo_inertial_publisher/color/image", Image, self.callback)
+    self.image_sub = rospy.Subscriber("/stereo_inertial_publisher/color/image", Image, self.callback) #topic to get the rgb image
     
-    self.pub = rospy.Publisher('/pallet_detector/pallet', String, queue_size=25)	
-    model = torch.hub.load('ultralytics/yolov5', 'custom', path='pallet.pt') 
+    self.pub = rospy.Publisher('/pallet_detector/pallet', String, queue_size=25)	#publisher to publish the cordinates of the detected pallet
+    model = torch.hub.load('ultralytics/yolov5', 'custom', path='pallet.pt')   #loading the custom model
     
 
   def callback(self, rgb_data):
     
     try:
       img = self.bridge.imgmsg_to_cv2(rgb_data, "bgr8")
-      #face_cascade = cv2.CascadeClassifier('/home/bloisi/catkin_ws/src/unibas_face_detector/haarcascade/haarcascade_frontalface_default.xml')
-      #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-      #faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+      
       result=model(img)
-      result=result.pandas().xyxy[0]
-      ymax=result['ymax'][0]
+      result=result.pandas().xyxy[0] #converting the result to a dataframe
+      ymax=result['ymax'][0]  # getting the corner points of the bounding box of the first pallet
       ymin=result['ymin'][0]
       xmax=result['xmax'][0]
       xmin=result['xmin'][0]
-      box=str(xmin)+' '+str(xmax)+' '+str(ymin)+' '+str(ymax)
+      box=str(xmin)+' '+str(xmax)+' '+str(ymin)+' '+str(ymax) #string to publish the cordinates 
       
       
             
@@ -47,7 +45,7 @@ class pallet_detector:
     
     try:
       
-      self.pub.publish(box)
+      self.pub.publish(box) #publishing the values
     except CvBridgeError as e:
       print(e)
     
